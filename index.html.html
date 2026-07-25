@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mural Digital · Galería de Herramientas de Análisis de Entorno</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #12312c; }
+</style>
+<style>
+  .mural-root {
+    --ink: #1b2a2e;
+    --paper: #eee7d8;
+    --board: #12312c;
+    --board-2: #0c2521;
+    --gold: #c8a24a;
+    --coral: #c15b3f;
+    --sea: #4c7a72;
+    --slate: #33474b;
+    --note-green: #d7e4c9;
+    --note-red: #f0cfc3;
+    --note-blue: #cfe1e8;
+    --note-orange: #f5ddb0;
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--ink);
+    background: var(--board);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(255,255,255,0.035) 1px, transparent 0);
+    background-size: 22px 22px;
+    padding: 0 0 60px 0;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .mural-root * { box-sizing: border-box; }
+
+  .mural-header {
+    padding: 48px 40px 30px 40px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .mural-eyebrow {
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    font-size: 11px;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+  .mural-title {
+    font-family: 'Archivo Black', 'Arial Black', sans-serif;
+    font-size: clamp(28px, 4vw, 46px);
+    color: var(--paper);
+    line-height: 1.05;
+    margin: 0 0 14px 0;
+    letter-spacing: -0.01em;
+  }
+  .mural-sub {
+    color: rgba(238,231,216,0.65);
+    font-size: 15px;
+    max-width: 620px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+  .mural-sub b { color: var(--gold); font-weight: 600; }
+
+  .mural-nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 20px 20px 0 20px;
+  }
+  .mural-nav button {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    background: rgba(255,255,255,0.06);
+    color: var(--paper);
+    border: 1px solid rgba(255,255,255,0.18);
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all .2s ease;
+  }
+  .mural-nav button:hover { background: rgba(255,255,255,0.14); }
+  .mural-nav button.active { background: var(--gold); color: var(--board-2); border-color: var(--gold); }
+
+  .mural-section {
+    padding: 44px 40px 10px 40px;
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 6px;
+  }
+  .section-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--board-2);
+    background: var(--gold);
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+  .section-title {
+    font-family: 'Archivo Black', 'Arial Black', sans-serif;
+    font-size: 26px;
+    color: var(--paper);
+    margin: 0;
+  }
+  .section-desc {
+    color: rgba(238,231,216,0.6);
+    font-size: 14.5px;
+    max-width: 700px;
+    margin: 10px 0 26px 0;
+    line-height: 1.55;
+  }
+
+  /* ---- Sticky notes ---- */
+  .note {
+    border-radius: 3px;
+    padding: 18px 18px 16px 18px;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.4) inset;
+    cursor: pointer;
+    transform: rotate(var(--r, 0deg));
+    transition: transform .25s ease, box-shadow .25s ease;
+    position: relative;
+  }
+  .note:hover { transform: rotate(0deg) translateY(-3px); box-shadow: 0 16px 30px rgba(0,0,0,0.34); }
+  .note h4 {
+    font-family: 'Archivo Black', 'Arial Black', sans-serif;
+    font-size: 15px;
+    margin: 0 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+  }
+  .note p { font-size: 13.5px; line-height: 1.5; margin: 0 0 8px 0; }
+  .note ul { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.55; }
+  .note .pin {
+    position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+    width: 14px; height: 14px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff, var(--coral) 70%);
+    box-shadow: 0 3px 4px rgba(0,0,0,0.4);
+  }
+
+  /* DOFA grid */
+  .dofa-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+  }
+  .note.fortalezas { background: var(--note-green); --r: -1.2deg; }
+  .note.debilidades { background: var(--note-red); --r: 1deg; }
+  .note.oportunidades { background: var(--note-blue); --r: 1.3deg; }
+  .note.amenazas { background: var(--note-orange); --r: -0.8deg; }
+
+  /* PESTEL */
+  .pestel-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+  .pestel-card {
+    background: rgba(238,231,216,0.97);
+    border-radius: 8px;
+    padding: 16px 16px 14px 16px;
+    border-left: 5px solid var(--sea);
+  }
+  .pestel-card .letter {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 22px;
+    color: var(--sea);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .pestel-card h4 { font-size: 14px; margin: 0 0 6px 0; font-family: 'Archivo Black', sans-serif; }
+  .pestel-card p { font-size: 12.8px; line-height: 1.5; margin: 0 0 6px 0; }
+  .pestel-card .example { font-size: 12px; color: var(--coral); font-style: italic; }
+
+  /* Porter */
+  .porter-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 14px;
+    align-items: center;
+    justify-items: center;
+  }
+  .porter-box {
+    background: rgba(238,231,216,0.97);
+    border-radius: 8px;
+    padding: 14px 14px;
+    font-size: 12.6px;
+    line-height: 1.5;
+    text-align: left;
+    width: 100%;
+  }
+  .porter-box h4 { font-family: 'Archivo Black', sans-serif; font-size: 13px; margin: 0 0 6px 0; color: var(--board-2); }
+  .porter-center {
+    grid-column: 2; grid-row: 2;
+    background: var(--coral);
+    color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.3);
+  }
+  .porter-top { grid-column: 2; grid-row: 1; }
+  .porter-bottom { grid-column: 2; grid-row: 3; }
+  .porter-left { grid-column: 1; grid-row: 2; }
+  .porter-right { grid-column: 3; grid-row: 2; }
+  .porter-arrow { font-size: 18px; color: var(--gold); text-align: center; }
+
+  /* MPC table */
+  .mpc-table-wrap { overflow-x: auto; border-radius: 10px; }
+  table.mpc {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(238,231,216,0.97);
+    font-size: 12.8px;
+    min-width: 560px;
+  }
+  table.mpc th, table.mpc td {
+    padding: 10px 12px;
+    text-align: center;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+  table.mpc thead th {
+    background: var(--slate);
+    color: var(--paper);
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 11.5px;
+    text-transform: uppercase;
+  }
+  table.mpc td:first-child, table.mpc th:first-child { text-align: left; font-weight: 700; }
+  table.mpc tbody tr:nth-child(odd) { background: rgba(0,0,0,0.03); }
+  table.mpc .total { font-weight: 800; color: var(--coral); }
+
+  .footnote {
+    max-width: 1080px;
+    margin: 30px auto 0 auto;
+    padding: 0 40px;
+    color: rgba(238,231,216,0.5);
+    font-size: 12px;
+    line-height: 1.6;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 20px;
+  }
+
+  @media (max-width: 720px) {
+    .dofa-grid, .pestel-row { grid-template-columns: 1fr; }
+    .porter-wrap { grid-template-columns: 1fr; }
+    .porter-box, .porter-center { grid-column: 1 !important; grid-row: auto !important; }
+    .mural-section { padding: 32px 18px 10px 18px; }
+    .mural-header { padding: 36px 20px 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="mural-root" id="muralRoot">
+
+  <div class="mural-header">
+    <div class="mural-eyebrow">Mural digital · Galería de herramientas</div>
+    <h1 class="mural-title">Análisis de Entorno<br/>en Cuatro Movimientos</h1>
+    <p class="mural-sub">DOFA, PESTEL, las 5 Fuerzas de Porter y la Matriz de Perfil Competitivo, explicadas y aplicadas al caso de <b>Starbucks Corporation</b> como ejemplo guía. Haz clic en cualquier nota para expandirla.</p>
+  </div>
+
+  <div class="mural-nav">
+    <button class="active" onclick="muralScroll('dofa')">1 · DOFA</button>
+    <button onclick="muralScroll('pestel')">2 · PESTEL</button>
+    <button onclick="muralScroll('porter')">3 · 5 Fuerzas</button>
+    <button onclick="muralScroll('mpc')">4 · MPC</button>
+  </div>
+
+  <!-- ===== DOFA ===== -->
+  <div class="mural-section" id="dofa">
+    <div class="section-head">
+      <span class="section-tag">01</span>
+      <h3 class="section-title">Matriz DOFA (SWOT)</h3>
+    </div>
+    <p class="section-desc">Cruza el diagnóstico interno (lo que la empresa controla) con el externo (lo que el entorno impone), para ubicar en un solo vistazo dónde debe defenderse, dónde debe atacar y qué debe vigilar.</p>
+    <div class="dofa-grid">
+      <div class="note fortalezas" onclick="toggleNote(this)">
+        <span class="pin"></span>
+        <h4>Fortalezas</h4>
+        <p><b>Interno · positivo.</b> Lo que la empresa hace mejor que el promedio del sector.</p>
+        <ul class="detail" style="display:none">
+          <li>Marca global reconocida y alta fidelización del cliente</li>
+          <li>Control directo de la experiencia en tienda (modelo propio, no solo franquicia)</li>
+          <li>Programa de membresía y app con altísimo volumen de transacciones digitales</li>
+        </ul>
+      </div>
+      <div class="note debilidades" onclick="toggleNote(this)">
+        <span class="pin"></span>
+        <h4>Debilidades</h4>
+        <p><b>Interno · negativo.</b> Lo que limita a la empresa frente a sus rivales.</p>
+        <ul class="detail" style="display:none">
+          <li>Precios percibidos como altos frente a competidores locales</li>
+          <li>Alta dependencia de pocos proveedores de café verde certificado</li>
+          <li>Estructura de costos sensible a la rotación de personal en tienda</li>
+        </ul>
+      </div>
+      <div class="note oportunidades" onclick="toggleNote(this)">
+        <span class="pin"></span>
+        <h4>Oportunidades</h4>
+        <p><b>Externo · positivo.</b> Tendencias del entorno que la empresa podría capitalizar.</p>
+        <ul class="detail" style="display:none">
+          <li>Crecimiento del consumo de café especializado en mercados emergentes</li>
+          <li>Demanda creciente de opciones vegetales y bajas en azúcar</li>
+          <li>Expansión de pedidos digitales y entrega a domicilio</li>
+        </ul>
+      </div>
+      <div class="note amenazas" onclick="toggleNote(this)">
+        <span class="pin"></span>
+        <h4>Amenazas</h4>
+        <p><b>Externo · negativo.</b> Riesgos del entorno que la empresa no controla.</p>
+        <ul class="detail" style="display:none">
+          <li>Volatilidad del precio internacional del café por clima y logística</li>
+          <li>Competencia de cadenas locales de menor precio y cafeterías independientes</li>
+          <li>Cambios regulatorios sobre empaques plásticos y sostenibilidad</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PESTEL ===== -->
+  <div class="mural-section" id="pestel">
+    <div class="section-head">
+      <span class="section-tag">02</span>
+      <h3 class="section-title">Análisis PESTEL</h3>
+    </div>
+    <p class="section-desc">Escanea seis capas del macroentorno que la empresa no controla, pero que condicionan sus decisiones de largo plazo. Cada tarjeta muestra el factor y un ejemplo aplicado al caso.</p>
+    <div class="pestel-row">
+      <div class="pestel-card"><span class="letter">P</span><h4>Político</h4><p>Estabilidad de gobierno, tratados comerciales, aranceles.</p><p class="example">Ej.: aranceles a la importación de café en ciertos mercados.</p></div>
+      <div class="pestel-card"><span class="letter">E</span><h4>Económico</h4><p>Inflación, tipo de cambio, poder adquisitivo.</p><p class="example">Ej.: caída del consumo discrecional en épocas de inflación alta.</p></div>
+      <div class="pestel-card"><span class="letter">S</span><h4>Social</h4><p>Hábitos de consumo, demografía, valores culturales.</p><p class="example">Ej.: auge de dietas veganas y bebidas de origen vegetal.</p></div>
+      <div class="pestel-card"><span class="letter">T</span><h4>Tecnológico</h4><p>Automatización, comercio digital, nuevas plataformas.</p><p class="example">Ej.: pedidos anticipados vía app y pago sin contacto.</p></div>
+      <div class="pestel-card"><span class="letter">E</span><h4>Ecológico</h4><p>Regulación ambiental, huella de carbono, sostenibilidad.</p><p class="example">Ej.: metas de reducción de vasos desechables.</p></div>
+      <div class="pestel-card"><span class="letter">L</span><h4>Legal</h4><p>Leyes laborales, protección al consumidor, normas sanitarias.</p><p class="example">Ej.: normativas de etiquetado nutricional obligatorio.</p></div>
+    </div>
+  </div>
+
+  <!-- ===== PORTER ===== -->
+  <div class="mural-section" id="porter">
+    <div class="section-head">
+      <span class="section-tag">03</span>
+      <h3 class="section-title">Las 5 Fuerzas de Porter</h3>
+    </div>
+    <p class="section-desc">Mide qué tan atractivo es competir en el sector, analizando cinco presiones que determinan la rentabilidad promedio de la industria.</p>
+    <div class="porter-wrap">
+      <div class="porter-box porter-top"><h4>Nuevos competidores</h4>Barreras de entrada moderadas: se necesita capital de marca, pero abrir una cafetería independiente es relativamente accesible.</div>
+      <div class="porter-box porter-left"><h4>Poder de proveedores</h4>Alto: pocos proveedores certificados de café de alta calidad concentran la oferta.</div>
+      <div class="porter-center">Rivalidad<br/>entre competidores<br/><span style="font-weight:400; font-size:11.5px;">Alta: cadenas globales, locales e independientes compiten por el mismo cliente urbano</span></div>
+      <div class="porter-box porter-right"><h4>Poder de clientes</h4>Medio: el cliente individual tiene bajo poder de negociación, pero puede cambiar de marca con facilidad.</div>
+      <div class="porter-box porter-bottom"><h4>Productos sustitutos</h4>Alto: té, bebidas energéticas, café instantáneo y máquinas domésticas de alta gama.</div>
+    </div>
+  </div>
+
+  <!-- ===== MPC ===== -->
+  <div class="mural-section" id="mpc">
+    <div class="section-head">
+      <span class="section-tag">04</span>
+      <h3 class="section-title">Matriz de Perfil Competitivo (MPC)</h3>
+    </div>
+    <p class="section-desc">Compara a la empresa contra sus rivales directos usando los mismos factores críticos de éxito, cada uno ponderado según su importancia en el sector.</p>
+    <div class="mpc-table-wrap">
+      <table class="mpc">
+        <thead>
+          <tr>
+            <th>Factor crítico de éxito</th>
+            <th>Peso</th>
+            <th>Starbucks</th>
+            <th>Cadena local A</th>
+            <th>Cafetería independiente</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Reconocimiento de marca</td><td>0.25</td><td>4 · 1.00</td><td>3 · 0.75</td><td>1 · 0.25</td></tr>
+          <tr><td>Precio competitivo</td><td>0.20</td><td>2 · 0.40</td><td>4 · 0.80</td><td>3 · 0.60</td></tr>
+          <tr><td>Presencia digital / app</td><td>0.20</td><td>4 · 0.80</td><td>2 · 0.40</td><td>1 · 0.20</td></tr>
+          <tr><td>Calidad percibida</td><td>0.20</td><td>3 · 0.60</td><td>3 · 0.60</td><td>4 · 0.80</td></tr>
+          <tr><td>Cobertura de puntos de venta</td><td>0.15</td><td>4 · 0.60</td><td>3 · 0.45</td><td>1 · 0.15</td></tr>
+          <tr><td class="total">Total ponderado</td><td class="total">1.00</td><td class="total">3.40</td><td class="total">3.00</td><td class="total">2.00</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footnote">
+    Escala de calificación MPC: 1 = debilidad mayor, 2 = debilidad menor, 3 = fortaleza menor, 4 = fortaleza mayor. El puntaje ponderado resulta de multiplicar la calificación por el peso del factor.
+  </div>
+</div>
+
+<script>
+  function toggleNote(el) {
+    var detail = el.querySelector('.detail');
+    if (detail) detail.style.display = (detail.style.display === 'none') ? 'block' : 'none';
+  }
+  function muralScroll(id) {
+    var target = document.getElementById(id);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelectorAll('.mural-nav button').forEach(function(b){ b.classList.remove('active'); });
+    event.target.classList.add('active');
+  }
+</script>
+</body>
+</html>
